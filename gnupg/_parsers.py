@@ -877,7 +877,7 @@ class GenKey(object):
 
         :raises: :exc:`~exceptions.ValueError` if the status message is unknown.
         """
-        if key in ("GOOD_PASSPHRASE"):
+        if key in ("GOOD_PASSPHRASE", "KEY_CONSIDERED"):
             pass
         elif key == "KEY_NOT_CREATED":
             self.status = 'key not created'
@@ -927,6 +927,8 @@ class DeleteResult(object):
 
         :raises: :exc:`~exceptions.ValueError` if the status message is unknown.
         """
+        if key == "KEY_CONSIDERED":
+            pass
         if key == "DELETE_PROBLEM":
             self.status = self.problem_reason.get(value, "Unknown error: %r"
                                                   % value)
@@ -973,7 +975,9 @@ class Sign(object):
 
         :raises: :exc:`~exceptions.ValueError` if the status message is unknown.
         """
-        if key in ("USERID_HINT", "NEED_PASSPHRASE", "BAD_PASSPHRASE",
+        if key == "KEY_CONSIDERED":
+            pass
+        elif key in ("USERID_HINT", "NEED_PASSPHRASE", "BAD_PASSPHRASE",
                    "GOOD_PASSPHRASE", "MISSING_PASSPHRASE", "PINENTRY_LAUNCHED",
                    "BEGIN_SIGNING", "CARDCTRL", "INV_SGNR", "SIGEXPIRED"):
             self.status = key.replace("_", " ").lower()
@@ -1148,8 +1152,9 @@ class ImportResult(object):
 
         :raises ValueError: if the status message is unknown.
         """
-        if key == "IMPORTED":
-            # this duplicates info we already see in import_ok & import_problem
+        if key in ("IMPORTED", "KEY_CONSIDERED"):
+            # IMPORTED : duplicates info we already see in import_ok & import_problem
+            # KEY_CONSIDERED : not useful info
             pass
         elif key == "NODATA":
             self.results.append({'fingerprint': None,
@@ -1384,7 +1389,7 @@ class Verify(object):
         elif key in ("RSA_OR_IDEA", "NODATA", "IMPORT_RES", "PLAINTEXT",
                      "PLAINTEXT_LENGTH", "POLICY_URL", "DECRYPTION_INFO",
                      "DECRYPTION_OKAY", "INV_SGNR", "PROGRESS",
-                     "PINENTRY_LAUNCHED", "SUCCESS"):
+                     "PINENTRY_LAUNCHED", "SUCCESS", "KEY_CONSIDERED"):
             pass
         elif key == "NEWSIG":
             # Reset
@@ -1581,7 +1586,7 @@ class Crypt(Verify):
         """
         if key in ("ENC_TO", "USERID_HINT", "GOODMDC", "END_DECRYPTION",
                    "BEGIN_SIGNING", "NO_SECKEY", "ERROR", "NODATA",
-                   "CARDCTRL"):
+                   "CARDCTRL", "KEY_CONSIDERED"):
             # in the case of ERROR, this is because a more specific error
             # message will have come first
             pass
